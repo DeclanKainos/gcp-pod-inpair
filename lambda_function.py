@@ -138,18 +138,8 @@ def lambda_handler(event, context):
         </div>
         '''
 
-        # Add a simple completion popup message
-        popup_script = f'''
-        <script>
-        window.onload = function() {{
-            alert("Processing complete! Added {points_added} points to the map in {execution_time:.2f} seconds.");
-        }};
-        </script>
-        '''
-
-        # Add both elements to the map
+        # Add title to the map
         my_map.get_root().html.add_child(folium.Element(title_html))
-        my_map.get_root().html.add_child(folium.Element(popup_script))
 
         # Save the map as a (/tmp required by Lambda) HTML file
         output_path = "/tmp/index.html"
