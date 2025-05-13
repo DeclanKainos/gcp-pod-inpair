@@ -4,10 +4,8 @@ InPost data driven air quality visualisation across Poland
 Possible thanks to InPost exposing their [API ShipX](https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/622754/API+ShipX)
 
 
-Designed to run as either an AWS Lambda function or a Google Cloud Run service.
-The AWS Lambda variant stores results in an S3 bucket, which serves as the backend for a static website.
-It is triggered hourly to refresh the data.
-The Google Cloud Run variant stores results in a Google Cloud Storage bucket.
+Designed to run as an AWS Lambda function.
+The function stores results in an S3 bucket, which powers a static website. It is triggered hourly to refresh the data.
 
 http://www.inpair.pl
 
@@ -21,15 +19,31 @@ Ensure that the relevant API key is specified in a .env file
 with the environment var for the API key set as shown below
 ```text
 INPOST_API_TOKEN={YOUR_API_TOKEN}
+S3_BUCKET_NAME={YOUR_S3_BUCKET_NAME}
+```
+
+If your local testing environment is behind a proxy (e.g. ZScaler),
+add the following lines to import the required cacert.pem into
+your docker container. this should be BEFORE the pip install step:
+
+```dockerfile
+# Copy your local CA cert into the container (if it exists)
+COPY cacert.pem /tmp/cacert.pem
+
+# Ensure Python/requests uses proper CA certs
+ENV SSL_CERT_FILE="/tmp/cacert.pem"
+ENV REQUESTS_CA_BUNDLE="/tmp/cacert.pem"
+
 ```
 
 Docker commands:
 ```shell
-docker build -t inpost-map-fn .
-docker run --env-file .env -p 8080:8080 inpost-map-fn
+docker build -t inpost-map-fn-lambda .
+docker run --env-file .env -p 8080:8080 inpost-map-fn-lambda
 ```
 
-Once the container is built and running, browse to localhost:8080 to see the page load.
-
-*Note:* Docker must be installed for this to succeed, include any cacerts required within
-the dockerfile as necessary when running behind a proxy (e.g. ZScaler).
+To test the lambda function locally, run the line below and
+analyse the log output and response payload:
+```shell
+curl -XPOST "http://localhost:8080/2015-03-31/functions/function/invocations" -d '{}'
+```
