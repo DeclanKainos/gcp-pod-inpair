@@ -42,7 +42,7 @@ docker build -t inpost-map-fn-lambda .
 docker run --env-file .env -p 8080:8080 inpost-map-fn-lambda
 ```
 
-To test the lambda function locally, run the line below and
+To test the lambda function running as a docker container locally, run the line below and
 analyse the log output and response payload:
 ```shell
 curl -XPOST "http://localhost:8080/2015-03-31/functions/function/invocations" -d '{}'
